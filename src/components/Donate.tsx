@@ -12,11 +12,6 @@ const Donate: React.FC = () => {
         development and maintenance.
       </p>
       <div className="mb-4">
-        {/* <a
-          href="https://www.bitcoinqrcodemaker.com"
-          target="_blank"
-          rel="noopener noreferrer"
-        > */}
         <img
           src={btcQRCode}
           height="300"
@@ -24,7 +19,6 @@ const Donate: React.FC = () => {
           alt="Bitcoin QR code"
           title="bitcoin:bc1qn88azanum4f2vdr6nldmnxe9vyp7hhspcudz3a"
         />
-        {/* </a> */}
       </div>
       <p className="text-sm text-center">
         Bitcoin Address: <br />

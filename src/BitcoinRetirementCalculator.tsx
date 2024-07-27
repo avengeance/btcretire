@@ -21,6 +21,8 @@ import {
 import { Button } from "./components/ui/button";
 import { ThemeProvider } from "./components/ui/theme-provider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface InputState {
   startingBitcoinBalance: number;
@@ -119,19 +121,6 @@ const BitcoinRetirementCalculator: React.FC = () => {
       finalRate !== undefined && decreaseYears !== undefined
         ? (initialRate - finalRate) / decreaseYears
         : 0;
-
-    // for (let year = 0; year < 25; year++) {
-    //   if (year > 0 && decreaseYears !== undefined) {
-    //     // Apply the yearly decrease amount for the "decreasing" scenario
-    //     if (withdrawalRate > finalRate) {
-    //       withdrawalRate = Math.max(
-    //         initialRate - yearlyDecreaseAmount * year,
-    //         finalRate
-    //       );
-    //     } else {
-    //       withdrawalRate = finalRate;
-    //     }
-    //   }
 
     for (let year = 0; year < 25; year++) {
       // Add the initial rate for the first year
@@ -267,6 +256,17 @@ const BitcoinRetirementCalculator: React.FC = () => {
     }
     const currentResults = results[0];
 
+    const numberFormatter = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+    });
+
+    const numberFormatterNoCurrency = new Intl.NumberFormat("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 8,
+    });
+
     return (
       <div className="overflow-x-auto">
         <table className="min-w-full">
@@ -285,27 +285,27 @@ const BitcoinRetirementCalculator: React.FC = () => {
           <tbody>
             {currentResults.map((row, index) => (
               <tr key={index} className={index % 2 === 0 ? "bg-gray-500" : ""}>
-                <td className="px-2 py-2 text-xs">{row.year}</td>
-                <td className="px-2 py-2 text-xs">
-                  {row.bitcoinBalance.toFixed(8)}
+                <td className="px-2 py-2 text-xs text-center">{row.year}</td>
+                <td className="px-2 py-2 text-xs text-center">
+                  {numberFormatterNoCurrency.format(row.bitcoinBalance)}
                 </td>
-                <td className="px-2 py-2 text-xs">
-                  ${row.boyBalance.toFixed(2)}
+                <td className="px-2 py-2 text-xs text-center">
+                  {numberFormatter.format(row.boyBalance)}
                 </td>
-                <td className="px-2 py-2 text-xs">
-                  ${row.eoyBitcoinPrice.toFixed(2)}
+                <td className="px-2 py-2 text-xs text-center">
+                  {numberFormatter.format(row.eoyBitcoinPrice)}
                 </td>
-                <td className="px-2 py-2 text-xs">
+                <td className="px-2 py-2 text-xs text-center">
                   {row.withdrawalRate.toFixed(2)}%
                 </td>
-                <td className="px-2 py-2 text-xs">
-                  {row.withdrawalAmountBTC.toFixed(8)}
+                <td className="px-2 py-2 text-xs text-center">
+                  {numberFormatterNoCurrency.format(row.withdrawalAmountBTC)}
                 </td>
-                <td className="px-2 py-2 text-xs">
-                  ${row.withdrawalAmountUSD.toFixed(2)}
+                <td className="px-2 py-2 text-xs text-center">
+                  {numberFormatter.format(row.withdrawalAmountUSD)}
                 </td>
-                <td className="px-2 py-2 text-xs">
-                  ${row.basketOfGoods.toFixed(2)}
+                <td className="px-2 py-2 text-xs text-center">
+                  {numberFormatter.format(row.basketOfGoods)}
                 </td>
               </tr>
             ))}
@@ -313,6 +313,77 @@ const BitcoinRetirementCalculator: React.FC = () => {
         </table>
       </div>
     );
+  };
+
+  const downloadCSV = (data) => {
+    const csvRows = [
+      [
+        "Year",
+        "Bitcoin Balance",
+        "BOY Balance",
+        "EOY Bitcoin Price",
+        "Withdrawal Rate",
+        "Withdrawal Amount BTC",
+        "Withdrawal Amount USD",
+        "Basket of Goods",
+      ],
+    ];
+
+    data.forEach((row) => {
+      csvRows.push([
+        row.year,
+        row.bitcoinBalance.toFixed(8),
+        row.boyBalance.toFixed(2),
+        row.eoyBitcoinPrice.toFixed(2),
+        `${row.withdrawalRate.toFixed(2)}%`,
+        row.withdrawalAmountBTC.toFixed(8),
+        row.withdrawalAmountUSD.toFixed(2),
+        row.basketOfGoods.toFixed(2),
+      ]);
+    });
+
+    const csvContent = csvRows.map((e) => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.setAttribute("href", url);
+    a.setAttribute("download", "BitcoinRetirementData.csv");
+    a.click();
+  };
+
+  const downloadPDF = (data) => {
+    const doc = new jsPDF();
+
+    const tableColumn = [
+      "Year",
+      "Bitcoin Balance",
+      "BOY Balance",
+      "EOY Bitcoin Price",
+      "Withdrawal Rate",
+      "Withdrawal Amount BTC",
+      "Withdrawal Amount USD",
+      "Basket of Goods",
+    ];
+    const tableRows = [];
+
+    data.forEach((row) => {
+      const rowData = [
+        row.year,
+        row.bitcoinBalance.toFixed(8),
+        row.boyBalance.toFixed(2),
+        row.eoyBitcoinPrice.toFixed(2),
+        `${row.withdrawalRate.toFixed(2)}%`,
+        row.withdrawalAmountBTC.toFixed(8),
+        row.withdrawalAmountUSD.toFixed(2),
+        row.basketOfGoods.toFixed(2),
+      ];
+      tableRows.push(rowData);
+    });
+
+    doc.autoTable(tableColumn, tableRows, { startY: 20 });
+    doc.text("Bitcoin Retirement Data", 14, 15);
+    doc.save("BitcoinRetirementData.pdf");
   };
 
   return (
@@ -389,7 +460,60 @@ const BitcoinRetirementCalculator: React.FC = () => {
           </div>
         ) : (
           <div className="text-center">
-            No results to display. Please calculate first.
+            <p>
+              <span className="text-red-600">Disclaimer</span>
+              <br></br> The Bitcoin Retirement Calculator provided on this
+              website is for informational and educational purposes only. The
+              results generated by the calculator are based on the inputs
+              provided by the user and are not guaranteed to be accurate,
+              complete, or up-to-date. The calculator is a tool designed to help
+              users estimate potential outcomes based on various assumptions and
+              should not be relied upon as financial, investment, or legal
+              advice. Important Considerations: Assumptions and Projections: The
+              calculations are based on user-provided inputs and assumptions,
+              including but not limited to, initial Bitcoin balance, Bitcoin
+              price growth rate, inflation rate, withdrawal rate, and other
+              variables. These assumptions may not reflect real-world conditions
+              and can significantly impact the results. Market Volatility: The
+              value of Bitcoin and other cryptocurrencies can be highly
+              volatile. Historical performance is not indicative of future
+              results. The calculator does not account for potential market
+              fluctuations, regulatory changes, or other unforeseen events that
+              may affect the value of Bitcoin. No Financial Advice: This
+              calculator is not intended to provide financial, investment, or
+              legal advice. Users should consult with a qualified financial
+              advisor or investment professional before making any decisions
+              based on the results of this calculator. Data Accuracy: While
+              efforts are made to ensure the accuracy of the data and
+              assumptions used in the calculator, no guarantees are made
+              regarding the accuracy, completeness, or reliability of the
+              information provided. User Responsibility: Users are solely
+              responsible for the decisions they make based on the results of
+              this calculator. The creators of this website and the Bitcoin
+              Retirement Calculator do not accept any liability for any loss or
+              damage incurred by users as a result of using this tool. By using
+              the Bitcoin Retirement Calculator, you acknowledge and agree to
+              the terms of this disclaimer.
+            </p>
+          </div>
+        )}
+        {results.length > 0 && results[0] && (
+          <div className="flex justify-evenly mt-8">
+            <Button
+              variant="secondary"
+              onClick={() => downloadCSV(results[0])}
+              className="btn"
+            >
+              Download CSV
+            </Button>
+
+            <Button
+              variant="secondary"
+              onClick={() => downloadPDF(results[0])}
+              className="btn"
+            >
+              Download PDF
+            </Button>
           </div>
         )}
       </div>

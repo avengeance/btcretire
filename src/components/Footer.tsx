@@ -2,14 +2,16 @@ import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import About from "./About";
 import Donate from "./Donate";
+import Disclaimer from "./Disclaimer";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="w-full bg-background border-t">
+    <footer className="w-full bg-background">
       <Tabs defaultValue="about" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="donate">Donate</TabsTrigger>
+          <TabsTrigger value="disclaimer">Disclaimer</TabsTrigger>
         </TabsList>
         <div className="max-h-100 overflow-y-auto">
           <TabsContent value="about">
@@ -17,6 +19,9 @@ const Footer: React.FC = () => {
           </TabsContent>
           <TabsContent value="donate">
             <Donate />
+          </TabsContent>
+          <TabsContent value="disclaimer">
+            <Disclaimer />
           </TabsContent>
         </div>
       </Tabs>
