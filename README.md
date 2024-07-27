@@ -84,7 +84,7 @@ Distributed under the MIT License. See `LICENSE` file for more information.
 
 Calvin Le - email.calvinle@gmail.com
 
-Project Link: [https://github.com/yourusername/bitcoin-retirement-calculator](https://github.com/yourusername/bitcoin-retirement-calculator)
+Project Link: [https://github.com/avengeance/btcretire](https://github.com/avengeance/btcretire)
 
 ## Acknowledgements
 
