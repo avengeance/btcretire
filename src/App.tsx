@@ -149,7 +149,7 @@ const BitcoinRetirementCalculator: React.FC = () => {
       const bitcoinBalance =
         year === 0 ? startingBitcoinBalance : data[year - 1].bitcoinBalance;
       const eoyBitcoinPrice =
-        startingBitcoinPrice * Math.pow(1 + growthRate / 100, year);
+        startingBitcoinPrice * Math.pow(1 + growthRate / 100, year + 1);
       const boyBalance =
         bitcoinBalance *
         (year === 0 ? startingBitcoinPrice : data[year - 1].eoyBitcoinPrice);
