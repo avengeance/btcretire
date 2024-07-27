@@ -5,18 +5,20 @@ import Donate from "./Donate";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="mt-8">
-      <Tabs defaultValue="about">
+    <footer className="w-full bg-background border-t">
+      <Tabs defaultValue="about" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="donate">Donate</TabsTrigger>
         </TabsList>
-        <TabsContent value="about">
-          <About />
-        </TabsContent>
-        <TabsContent value="donate">
-          <Donate />
-        </TabsContent>
+        <div className="max-h-100 overflow-y-auto">
+          <TabsContent value="about">
+            <About />
+          </TabsContent>
+          <TabsContent value="donate">
+            <Donate />
+          </TabsContent>
+        </div>
       </Tabs>
     </footer>
   );

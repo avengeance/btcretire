@@ -19,7 +19,6 @@ import {
   SelectValue,
 } from "./components/ui/select";
 import { Button } from "./components/ui/button";
-
 import { ThemeProvider } from "./components/ui/theme-provider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -54,8 +53,8 @@ const BitcoinRetirementCalculator: React.FC = () => {
     withdrawalRate: 5,
     basketOfGoods: 60000,
     inflationRate: 5,
-    initialHighWithdrawalRate: 50,
-    withdrawalRateDecreaseYears: 10,
+    initialHighWithdrawalRate: 20,
+    withdrawalRateDecreaseYears: 2,
     finalWithdrawalRate: 5,
   });
 
@@ -74,13 +73,27 @@ const BitcoinRetirementCalculator: React.FC = () => {
   };
 
   const calculateRetirement = () => {
-    const constantRateResults = calculateScenario(inputs.withdrawalRate);
-    const decreasingRateResults = calculateScenario(
-      inputs.initialHighWithdrawalRate,
-      inputs.finalWithdrawalRate,
-      inputs.withdrawalRateDecreaseYears
-    );
-    setResults([constantRateResults, decreasingRateResults]);
+    let calculatedResults;
+    if (selectedScenario === "constant") {
+      calculatedResults = calculateScenario(
+        inputs.withdrawalRate,
+        inputs.withdrawalRate, // Use the same rate for constant scenario
+        0 // No decrease rate
+      );
+    } else {
+      calculatedResults = calculateScenario(
+        inputs.initialHighWithdrawalRate,
+        inputs.finalWithdrawalRate,
+        inputs.withdrawalRateDecreaseYears
+      );
+    }
+
+    if (calculatedResults.length > 0) {
+      setResults([calculatedResults]);
+    } else {
+      console.error("Calculation produced no results");
+      setResults([]); // Clear results if calculation fails
+    }
   };
 
   const calculateScenario = (
@@ -98,15 +111,41 @@ const BitcoinRetirementCalculator: React.FC = () => {
       inflationRate,
     } = inputs;
 
-    for (let year = 0; year < 25; year++) {
-      const withdrawalRate =
-        finalRate !== undefined
-          ? initialRate -
-            (initialRate - finalRate) * Math.min(year / decreaseYears!, 1)
-          : initialRate;
+    let withdrawalRate = initialRate;
+    let bitcoinBalance = startingBitcoinBalance; // Initialize the bitcoin balance correctly
 
-      const bitcoinBalance =
-        year === 0 ? startingBitcoinBalance : data[year - 1].bitcoinBalance;
+    // Calculate the yearly decrease amount
+    const yearlyDecreaseAmount =
+      finalRate !== undefined && decreaseYears !== undefined
+        ? (initialRate - finalRate) / decreaseYears
+        : 0;
+
+    // for (let year = 0; year < 25; year++) {
+    //   if (year > 0 && decreaseYears !== undefined) {
+    //     // Apply the yearly decrease amount for the "decreasing" scenario
+    //     if (withdrawalRate > finalRate) {
+    //       withdrawalRate = Math.max(
+    //         initialRate - yearlyDecreaseAmount * year,
+    //         finalRate
+    //       );
+    //     } else {
+    //       withdrawalRate = finalRate;
+    //     }
+    //   }
+
+    for (let year = 0; year < 25; year++) {
+      // Add the initial rate for the first year
+      if (year === 0) {
+        withdrawalRate = initialRate;
+      } else {
+        // Decrease the withdrawal rate by the specified decrease amount each year
+        if (withdrawalRate > finalRate) {
+          withdrawalRate = Math.max(withdrawalRate - decreaseYears, finalRate);
+        } else {
+          withdrawalRate = finalRate;
+        }
+      }
+
       const eoyBitcoinPrice =
         startingBitcoinPrice * Math.pow(1 + growthRate / 100, year + 1);
       const boyBalance =
@@ -117,9 +156,10 @@ const BitcoinRetirementCalculator: React.FC = () => {
       const currentBasketOfGoods =
         basketOfGoods * Math.pow(1 + inflationRate / 100, year);
 
+      // Store the current balance before applying the withdrawal
       data.push({
         year: currentYear + year,
-        bitcoinBalance: bitcoinBalance - withdrawalAmountBTC,
+        bitcoinBalance,
         boyBalance,
         eoyBitcoinPrice,
         withdrawalAmountBTC,
@@ -127,6 +167,9 @@ const BitcoinRetirementCalculator: React.FC = () => {
         basketOfGoods: currentBasketOfGoods,
         withdrawalRate,
       });
+
+      // Update the bitcoin balance for the next year
+      bitcoinBalance -= withdrawalAmountBTC;
     }
 
     return data;
@@ -143,88 +186,104 @@ const BitcoinRetirementCalculator: React.FC = () => {
     return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
-  const ResultsChart = () => (
-    <div className="h-[300px] sm:h-[400px] mb-4">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={results[selectedScenario === "constant" ? 0 : 1]}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="year" />
-          <YAxis yAxisId="left" />
-          <YAxis yAxisId="right" orientation="right" />
-          <Tooltip />
-          <Legend />
-          <Line
-            yAxisId="left"
-            type="monotone"
-            dataKey="bitcoinBalance"
-            stroke="#8884d8"
-            name="BTC Balance"
-          />
-          <Line
-            yAxisId="right"
-            type="monotone"
-            dataKey="boyBalance"
-            stroke="#82ca9d"
-            name="BOY Balance ($)"
-          />
-          <Line
-            yAxisId="right"
-            type="monotone"
-            dataKey="eoyBitcoinPrice"
-            stroke="#ffc658"
-            name="EOY BTC Price ($)"
-          />
-          <Line
-            yAxisId="left"
-            type="monotone"
-            dataKey="withdrawalRate"
-            stroke="#ff7300"
-            name="Withdrawal Rate (%)"
-          />
-          <Line
-            yAxisId="left"
-            type="monotone"
-            dataKey="withdrawalAmountBTC"
-            stroke="#8dd1e1"
-            name="Withdrawal (BTC)"
-          />
-          <Line
-            yAxisId="right"
-            type="monotone"
-            dataKey="withdrawalAmountUSD"
-            stroke="#a4de6c"
-            name="Withdrawal ($)"
-          />
-          <Line
-            yAxisId="right"
-            type="monotone"
-            dataKey="basketOfGoods"
-            stroke="#d0ed57"
-            name="Basket of Goods ($)"
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  );
+  const ResultsChart = () => {
+    if (results.length === 0 || !results[0]) {
+      return <div>No data to display</div>;
+    }
+    const currentResults = results[0];
 
-  const ResultsTable = () => (
-    <div className="overflow-x-auto">
-      <table className="min-w-full">
-        <thead>
-          <tr>
-            <th className="px-2 py-2 text-xs">Year</th>
-            <th className="px-2 py-2 text-xs">BTC Balance</th>
-            <th className="px-2 py-2 text-xs">BOY Balance ($)</th>
-            <th className="px-2 py-2 text-xs">EOY BTC Price ($)</th>
-            <th className="px-2 py-2 text-xs">Withdrawal Rate (%)</th>
-            <th className="px-2 py-2 text-xs">Withdrawal (BTC)</th>
-            <th className="px-2 py-2 text-xs">Withdrawal ($)</th>
-            <th className="px-2 py-2 text-xs">Basket of Goods ($)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {results[selectedScenario === "constant" ? 0 : 1].map(
-            (row, index) => (
+    return (
+      <div className="h-[300px] sm:h-[400px] mb-4">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={currentResults}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="year" />
+            <YAxis yAxisId="left" />
+            <YAxis yAxisId="right" orientation="right" />
+            <Tooltip />
+            <Legend />
+            {/* <Line
+              yAxisId="left"
+              type="monotone"
+              dataKey="bitcoinBalance"
+              stroke="#8884d8"
+              name="BTC Balance"
+            /> */}
+            <Line
+              yAxisId="right"
+              type="monotone"
+              dataKey="boyBalance"
+              stroke="#82ca9d"
+              name="BOY Balance ($)"
+            />
+            <Line
+              yAxisId="right"
+              type="monotone"
+              dataKey="eoyBitcoinPrice"
+              stroke="#ffc658"
+              name="EOY BTC Price ($)"
+            />
+            <Line
+              yAxisId="left"
+              type="monotone"
+              dataKey="withdrawalRate"
+              stroke="#ff7300"
+              name="Withdrawal Rate (%)"
+            />
+            {/* <Line
+              yAxisId="left"
+              type="monotone"
+              dataKey="withdrawalAmountBTC"
+              stroke="#8dd1e1"
+              name="Withdrawal (BTC)"
+            /> */}
+            {/* <Line
+              yAxisId="right"
+              type="monotone"
+              dataKey="withdrawalAmountUSD"
+              stroke="#a4de6c"
+              name="Withdrawal ($)"
+            /> */}
+            {/* <Line
+              yAxisId="right"
+              type="monotone"
+              dataKey="basketOfGoods"
+              stroke="#d0ed57"
+              name="Basket of Goods ($)"
+            /> */}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  };
+
+  const ResultsTable = () => {
+    if (results.length === 0 || !results[0]) {
+      return (
+        <div className="text-center">
+          No results to display. Please calculate first.
+        </div>
+      );
+    }
+    const currentResults = results[0];
+
+    return (
+      <div className="overflow-x-auto">
+        <table className="min-w-full">
+          <thead>
+            <tr>
+              <th className="px-2 py-2 text-xs">Year</th>
+              <th className="px-2 py-2 text-xs">BTC Balance</th>
+              <th className="px-2 py-2 text-xs">BOY Balance ($)</th>
+              <th className="px-2 py-2 text-xs">EOY BTC Price ($)</th>
+              <th className="px-2 py-2 text-xs">Withdrawal Rate (%)</th>
+              <th className="px-2 py-2 text-xs">Withdrawal (BTC)</th>
+              <th className="px-2 py-2 text-xs">Withdrawal ($)</th>
+              <th className="px-2 py-2 text-xs">Basket of Goods ($)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentResults.map((row, index) => (
               <tr key={index} className={index % 2 === 0 ? "bg-gray-500" : ""}>
                 <td className="px-2 py-2 text-xs">{row.year}</td>
                 <td className="px-2 py-2 text-xs">
@@ -249,12 +308,12 @@ const BitcoinRetirementCalculator: React.FC = () => {
                   ${row.basketOfGoods.toFixed(2)}
                 </td>
               </tr>
-            )
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -293,6 +352,12 @@ const BitcoinRetirementCalculator: React.FC = () => {
                 ) {
                   return null;
                 }
+                if (
+                  selectedScenario === "decreasing" &&
+                  key === "withdrawalRate"
+                ) {
+                  return null;
+                }
                 return (
                   <div key={key}>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -317,27 +382,14 @@ const BitcoinRetirementCalculator: React.FC = () => {
           </div>
         </div>
 
-        {results.length > 0 && (
+        {results.length > 0 && results[0] && results[0].length > 0 ? (
           <div>
-            {isMobile ? (
-              <Tabs defaultValue="chart" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="chart">Chart</TabsTrigger>
-                  <TabsTrigger value="table">Table</TabsTrigger>
-                </TabsList>
-                <TabsContent value="chart">
-                  <ResultsChart />
-                </TabsContent>
-                <TabsContent value="table">
-                  <ResultsTable />
-                </TabsContent>
-              </Tabs>
-            ) : (
-              <div>
-                <ResultsChart />
-                <ResultsTable />
-              </div>
-            )}
+            <ResultsChart />
+            <ResultsTable />
+          </div>
+        ) : (
+          <div className="text-center">
+            No results to display. Please calculate first.
           </div>
         )}
       </div>
