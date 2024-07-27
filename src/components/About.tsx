@@ -2,8 +2,8 @@ import React from "react";
 
 const About: React.FC = () => {
   return (
-    <div className="text-center">
-      <h2 className="mb-2">About Bitcoin Retirement Calculator</h2>
+    <div className="text-center mb-10">
+      <h2 className="mb-10">About Bitcoin Retirement Calculator</h2>
       <p>
         This calculator helps you plan your retirement using Bitcoin as an
         investment vehicle.<br></br>There are limitations on what this tool can

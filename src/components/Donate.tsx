@@ -3,7 +3,7 @@ import btcQRCode from "../assets/btcretireqr.png";
 
 const Donate: React.FC = () => {
   return (
-    <div className="flex flex-col items-center p-4">
+    <div className="flex flex-col items-center p-4 mb-10">
       <h2 className="text-2xl font-bold mb-4">
         Support the Bitcoin Retirement Calculator
       </h2>
