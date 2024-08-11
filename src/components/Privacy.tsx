@@ -5,7 +5,7 @@ const Privacy: React.FC = () => {
     <div className="mx-24 mb-10">
       <p>Effective Date: July 27th, 2024</p>
       <p>
-        Welcome to [Your Website Name] ("we", "our", "us"). We are committed to
+        Welcome to retireinbitcoin.com ("we", "our", "us"). We are committed to
         protecting your privacy and ensuring that your personal information is
         handled in a safe and responsible manner. This Privacy Policy outlines
         how we collect, use, and protect your information when you visit our
