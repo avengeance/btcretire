@@ -1,13 +1,29 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import About from "./About";
 import Donate from "./Donate";
 import Disclaimer from "./Disclaimer";
 import Privacy from "./Privacy";
 
+declare global {
+  interface Window {
+    adsbygoogle: any;
+  }
+}
+
 const Footer: React.FC = () => {
+  useEffect(() => {
+    (window.adsbygoogle = window.adsbygoogle || []).push({});
+  }, []);
   return (
     <footer className="w-full bg-background">
+      <ins
+        className="adsbygoogle"
+        style={{ display: "block" }}
+        data-ad-client="ca-pub-6668357432443550"
+        data-ad-slot="your-ad-slot-id"
+        data-ad-format="auto"
+      ></ins>
       <Tabs defaultValue="about" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="about">About</TabsTrigger>
