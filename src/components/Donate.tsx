@@ -1,5 +1,6 @@
 import React from "react";
 import btcQRCode from "../assets/btcretireqr.png";
+import btcregQR from "../assets/btcregular.png";
 
 const Donate: React.FC = () => {
   return (
@@ -11,22 +12,39 @@ const Donate: React.FC = () => {
         If you find this tool useful, consider donating to support its
         development and maintenance.
       </p>
-      <div className="mb-4">
-        <img
-          src={btcQRCode}
-          height="300"
-          width="300"
-          alt="Bitcoin QR code"
-          title="bitcoin:bc1qn88azanum4f2vdr6nldmnxe9vyp7hhspcudz3a"
-        />
+      <div className="flex flex-col md:flex-row space-y-8 md:space-y-0 md:space-x-8">
+        <div className="flex flex-col items-center max-w-xs">
+          <img
+            src={btcQRCode}
+            height="300"
+            width="300"
+            alt="Bitcoin Silent Address QR code"
+            title="bitcoin:sp1qqgnrkyeet7yd8a3ucfj0u383tzejxt09csd86jdyjz6ch4lsuyk4jqug75tyz8znsh323vpsm6r4kaul3jn3eky78v3rt5j3q24ygt8595tpss8e"
+          />
+          <p className="text-sm text-center mt-2">
+            Bitcoin Silent Address:
+          </p>
+          <p className="font-mono text-xs break-all text-center mt-1 px-2">
+            sp1qqgnrkyeet7yd8a3ucfj0u383tzejxt09csd86jdyjz6ch4lsuyk4jqug75tyz8znsh323vpsm6r4kaul3jn3eky78v3rt5j3q24ygt8595tpss8e
+          </p>
+        </div>
+        <div className="flex flex-col items-center max-w-xs">
+          <img
+            src={btcregQR}
+            height="300"
+            width="300"
+            alt="Bitcoin Regular Address QR code"
+            title="bitcoin:bc1pm6zlpjs8cnw2d8unkzkxwf2ytzyrcz7zw64phs7kvy2kk60lkqdshq88pp"
+          />
+          <p className="text-sm text-center mt-2">
+            Bitcoin Address:
+          </p>
+          <p className="font-mono text-xs break-all text-center mt-1 px-2">
+            bc1pm6zlpjs8cnw2d8unkzkxwf2ytzyrcz7zw64phs7kvy2kk60lkqdshq88pp
+          </p>
+        </div>
       </div>
-      <p className="text-sm text-center">
-        Bitcoin Address: <br />
-        <span className="font-mono break-all">
-          bc1qn88azanum4f2vdr6nldmnxe9vyp7hhspcudz3a
-        </span>
-      </p>
-      <p className="mt-4 text-sm text-center">
+      <p className="mt-8 text-sm text-center">
         Thank you for your support! Your contributions help keep this calculator
         free and up-to-date.
       </p>
