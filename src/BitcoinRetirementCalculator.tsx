@@ -49,7 +49,7 @@ interface ResultRow {
 }
 
 const BitcoinRetirementCalculator: React.FC = () => {
-  const [inputs, setInputs] = useState<InputState>({
+  const [inputs, setInputs] = React.useState<InputState>({
     startingBitcoinBalance: 1,
     startingBitcoinPrice: 1000000,
     growthRate: 20,
@@ -101,8 +101,8 @@ const BitcoinRetirementCalculator: React.FC = () => {
 
   const calculateScenario = (
     initialRate: number,
-    finalRate?: number,
-    decreaseYears?: number
+    finalRate: number = initialRate,
+    decreaseYears: number = 0
   ): ResultRow[] => {
     const data: ResultRow[] = [];
     const currentYear = new Date().getFullYear();
@@ -130,7 +130,7 @@ const BitcoinRetirementCalculator: React.FC = () => {
       } else {
         // Decrease the withdrawal rate by the specified decrease amount each year
         if (withdrawalRate > finalRate) {
-          withdrawalRate = Math.max(withdrawalRate - decreaseYears, finalRate);
+          withdrawalRate = Math.max(withdrawalRate - yearlyDecreaseAmount, finalRate);
         } else {
           withdrawalRate = finalRate;
         }
@@ -316,7 +316,7 @@ const BitcoinRetirementCalculator: React.FC = () => {
     );
   };
 
-  const downloadCSV = (data) => {
+  const downloadCSV = (data: ResultRow[]) => {
     const csvRows = [];
 
     // Adding the disclaimer in the first cell of the first row
@@ -353,7 +353,7 @@ const BitcoinRetirementCalculator: React.FC = () => {
     ]);
 
     // Adding the data starting from the second column
-    data.forEach((row) => {
+    data.forEach((row: ResultRow) => {
       csvRows.push([
         "", // First column left empty
         row.year,
@@ -377,7 +377,7 @@ const BitcoinRetirementCalculator: React.FC = () => {
     a.click();
   };
 
-  const downloadPDF = (data) => {
+  const downloadPDF = (data: ResultRow[]) => {
     const doc = new jsPDF();
 
     const tableColumn = [
@@ -390,7 +390,7 @@ const BitcoinRetirementCalculator: React.FC = () => {
       "Withdrawal Amount USD",
       "Basket of Goods",
     ];
-    const tableRows = [];
+    const tableRows: (string | number)[][] = [];
 
     data.forEach((row) => {
       const rowData = [
