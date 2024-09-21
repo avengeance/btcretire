@@ -24,6 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import GenerationRetirementTable from "./components/GenerationRetirementTable";
 
 interface InputState {
   startingBitcoinBalance: number;
@@ -458,9 +459,32 @@ const BitcoinRetirementCalculator: React.FC = () => {
       <div className="p-4 max-w-screen-lg mx-auto">
         <a href="/">
           <h1 className="text-xl sm:text-2xl font-bold mb-4 text-center">
-            Bitcoin Retirement Calculator
+            <span className="text-orange-400">Bitcoin</span> Retirement
+            Calculator
           </h1>
         </a>
+        <div className="my-10">
+          <h2 className="text-xl font-bold mb-4 text-center">
+            Estimated Retirement Needs by Generation
+          </h2>
+          <div className="w-full max-w-3xl mx-auto">
+            <GenerationRetirementTable
+              bitcoinPrice={inputs.startingBitcoinPrice}
+              displayInSatoshis={displayInSatoshis}
+            />
+          </div>
+          <p className="my-8 text-center">
+            Data sourced from{" "}
+            <a
+              className="font-bold text-orange-400"
+              target="_blank"
+              rel="nopener nonreferrer"
+              href="https://news.northwesternmutual.com/planning-and-progress-study-2024"
+            >
+              Northwestern Mutual 2024 Planning & Progress Study
+            </a>
+          </p>
+        </div>
         <div className="flex justify-center mb-4">
           <div className="w-full max-w-md">
             <Select
