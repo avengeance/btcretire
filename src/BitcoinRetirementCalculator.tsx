@@ -483,6 +483,11 @@ const BitcoinRetirementCalculator: React.FC = () => {
             >
               Northwestern Mutual 2024 Planning & Progress Study
             </a>
+            <br></br>
+            <span className="text-red-500">
+              * Bitcoin Equivalent adjusts to 'Starting Bitcoin Price' default
+              Bitcoin value set at $1,000,000
+            </span>
           </p>
         </div>
         <div className="flex justify-center mb-4">
