@@ -554,13 +554,17 @@ const BitcoinRetirementCalculator: React.FC = () => {
         {results.length > 0 && results[0] && results[0].length > 0 ? (
           <div>
             <div className="flex items-center justify-center mb-4">
-              <span className="mr-2 text-orange-400">Display in BTC</span>
+              <span className="mr-2 text-orange-400">
+                Display in BTC <span className="text-lg">₿</span>
+              </span>
               <Switch
                 checked={displayInSatoshis}
                 onCheckedChange={toggleDisplayUnit}
                 className="data-[state=checked]:text-orange-400"
               />
-              <span className="ml-2 text-orange-400">Display in Satoshis</span>
+              <span className="ml-2 text-yellow-300">
+                Display in Satoshis <span className="text-lg">丰</span>
+              </span>
             </div>
             <ResultsChart />
             <ResultsTable />
