@@ -38,7 +38,7 @@ const GenerationRetirementTable: React.FC<GenerationRetirementTableProps> = ({
     };
 
     fetchBitcoinPrice();
-    const interval = setInterval(fetchBitcoinPrice, 60000);
+    const interval = setInterval(fetchBitcoinPrice, 300000);
     return () => clearInterval(interval);
   }, []);
 
